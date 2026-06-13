@@ -1,0 +1,1179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>The Compounding Observatory — Investment Projection</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,400..600&family=Spline+Sans:wght@400;500;600&family=Spline+Sans+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --ink:        #0a0d18;
+    --ink-2:      #0e1322;
+    --panel:      #131a2e;
+    --panel-2:    #18203a;
+    --line:       #25304f;
+    --line-soft:  #1b2440;
+    --parch:      #ece6d6;
+    --parch-dim:  #b9bdcf;
+    --muted:      #7e87a3;
+    --muted-2:    #5b637e;
+
+    --gold:       #e3b25a;
+    --gold-soft:  #f0cd8b;
+    --teal:       #58d3ab;
+    --teal-soft:  #8fe7cb;
+    --rose:       #d28a8a;
+    --rose-soft:  #e6b0b0;
+
+    --best:   var(--gold);
+    --avg:    var(--teal);
+    --worst:  var(--rose);
+
+    --radius: 16px;
+    --shadow: 0 24px 60px -28px rgba(0,0,0,0.85);
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body { margin: 0; padding: 0; }
+
+  body {
+    font-family: "Spline Sans", system-ui, sans-serif;
+    background:
+      radial-gradient(1200px 700px at 78% -8%, rgba(227,178,90,0.10), transparent 60%),
+      radial-gradient(1000px 800px at 8% 110%, rgba(88,211,171,0.09), transparent 58%),
+      var(--ink);
+    color: var(--parch);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    line-height: 1.5;
+    min-height: 100vh;
+    position: relative;
+    overflow-x: hidden;
+  }
+
+  /* subtle film grain */
+  body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.035;
+    z-index: 9999;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  .wrap {
+    max-width: 1240px;
+    margin: 0 auto;
+    padding: clamp(20px, 4vw, 52px) clamp(18px, 4vw, 44px) 80px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ---------- Masthead ---------- */
+  header.masthead {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 24px;
+    padding-bottom: 26px;
+    border-bottom: 1px solid var(--line);
+    flex-wrap: wrap;
+  }
+  .brand-eyebrow {
+    font-family: "Spline Sans Mono", monospace;
+    font-size: 11px;
+    letter-spacing: 0.34em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin: 0 0 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .brand-eyebrow::before {
+    content: "";
+    width: 22px; height: 1px;
+    background: var(--gold);
+    display: inline-block;
+  }
+  h1.title {
+    font-family: "Fraunces", serif;
+    font-optical-sizing: auto;
+    font-weight: 400;
+    font-size: clamp(2.1rem, 5.4vw, 3.7rem);
+    line-height: 0.98;
+    margin: 0;
+    letter-spacing: -0.015em;
+  }
+  h1.title em {
+    font-style: italic;
+    color: var(--gold-soft);
+  }
+  .masthead-aside {
+    text-align: right;
+    max-width: 320px;
+    color: var(--parch-dim);
+    font-size: 13.5px;
+    line-height: 1.5;
+  }
+  .masthead-aside .index-tag {
+    font-family: "Spline Sans Mono", monospace;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+  }
+
+  /* ---------- Layout ---------- */
+  .layout {
+    display: grid;
+    grid-template-columns: 348px 1fr;
+    gap: 30px;
+    margin-top: 34px;
+    align-items: start;
+  }
+  @media (max-width: 940px) {
+    .layout { grid-template-columns: 1fr; }
+  }
+
+  /* ---------- Controls ---------- */
+  .controls {
+    background: linear-gradient(180deg, var(--panel-2), var(--panel));
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 24px 22px 26px;
+    box-shadow: var(--shadow);
+    position: sticky;
+    top: 22px;
+  }
+  @media (max-width: 940px) {
+    .controls { position: static; }
+  }
+  .ctl-section + .ctl-section {
+    margin-top: 24px;
+    padding-top: 22px;
+    border-top: 1px dashed var(--line-soft);
+  }
+  .ctl-heading {
+    font-family: "Spline Sans Mono", monospace;
+    font-size: 10.5px;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 0 0 16px;
+  }
+  .field { margin-bottom: 16px; }
+  .field:last-child { margin-bottom: 0; }
+  .field label {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    font-size: 13px;
+    color: var(--parch-dim);
+    margin-bottom: 7px;
+  }
+  .field label .hint {
+    font-size: 11px;
+    color: var(--muted);
+    font-family: "Spline Sans Mono", monospace;
+  }
+  .money-input, .plain-input {
+    position: relative;
+  }
+  .money-input .cur {
+    position: absolute;
+    left: 13px; top: 50%;
+    transform: translateY(-50%);
+    color: var(--gold);
+    font-family: "Spline Sans Mono", monospace;
+    font-size: 14px;
+    pointer-events: none;
+  }
+  input[type="text"], input[type="number"], select {
+    width: 100%;
+    background: var(--ink-2);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    color: var(--parch);
+    font-family: "Spline Sans Mono", monospace;
+    font-size: 15px;
+    font-weight: 500;
+    padding: 12px 13px;
+    outline: none;
+    transition: border-color 0.18s, box-shadow 0.18s, background 0.18s;
+    -moz-appearance: textfield;
+  }
+  input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+  .money-input input { padding-left: 28px; }
+  input:focus, select:focus {
+    border-color: var(--gold);
+    box-shadow: 0 0 0 3px rgba(227,178,90,0.14);
+    background: #0c1120;
+  }
+  select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23e3b25a' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    padding-right: 34px;
+    cursor: pointer;
+  }
+
+  /* growth trio */
+  .trio {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+  .trio .field { margin-bottom: 0; }
+  .trio .field label { display: block; text-align: center; margin-bottom: 6px; }
+  .trio input { text-align: center; padding: 11px 6px; font-size: 14px; }
+  .trio .dot {
+    display: inline-block; width: 7px; height: 7px; border-radius: 50%;
+    margin-right: 5px; vertical-align: middle;
+  }
+  .dot.worst { background: var(--worst); }
+  .dot.avg   { background: var(--avg); }
+  .dot.best  { background: var(--best); }
+  .pct-suffix { position: relative; }
+  .pct-suffix::after {
+    content: "%";
+    position: absolute; right: 11px; top: 50%; transform: translateY(-50%);
+    color: var(--muted); font-family: "Spline Sans Mono", monospace; font-size: 12px;
+    pointer-events: none;
+  }
+  .trio .pct-suffix input { padding-right: 20px; }
+
+  .note {
+    font-size: 11.5px;
+    color: var(--muted);
+    line-height: 1.5;
+    margin: 12px 0 0;
+    padding: 10px 12px;
+    background: rgba(227,178,90,0.05);
+    border-left: 2px solid var(--gold);
+    border-radius: 0 6px 6px 0;
+  }
+  .note b { color: var(--gold-soft); font-weight: 500; }
+
+  /* reinvest toggle */
+  .seg {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4px;
+    background: var(--ink-2);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 4px;
+  }
+  .seg button {
+    background: transparent;
+    border: none;
+    color: var(--muted);
+    font-family: "Spline Sans", sans-serif;
+    font-size: 12.5px;
+    font-weight: 500;
+    padding: 9px 8px;
+    border-radius: 7px;
+    cursor: pointer;
+    transition: all 0.18s;
+  }
+  .seg button.on {
+    background: linear-gradient(180deg, rgba(88,211,171,0.22), rgba(88,211,171,0.10));
+    color: var(--teal-soft);
+    box-shadow: inset 0 0 0 1px rgba(88,211,171,0.3);
+  }
+
+  /* ---------- Main panel ---------- */
+  .stage { display: flex; flex-direction: column; gap: 26px; }
+
+  /* horizon pills */
+  .horizon {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .horizon .hz-label {
+    font-family: "Spline Sans Mono", monospace;
+    font-size: 10.5px; letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--muted); margin-right: 6px;
+  }
+  .pill {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    color: var(--parch-dim);
+    font-family: "Spline Sans Mono", monospace;
+    font-size: 13px;
+    padding: 9px 15px;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: all 0.18s;
+  }
+  .pill:hover { border-color: var(--gold); color: var(--parch); }
+  .pill.on {
+    background: linear-gradient(180deg, var(--gold-soft), var(--gold));
+    color: #2a1d05;
+    border-color: var(--gold-soft);
+    font-weight: 600;
+    box-shadow: 0 8px 22px -10px rgba(227,178,90,0.7);
+  }
+
+  /* headline cards */
+  .headline {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr 1fr;
+    gap: 16px;
+  }
+  @media (max-width: 680px) { .headline { grid-template-columns: 1fr; } }
+  .card {
+    background: linear-gradient(180deg, var(--panel-2), var(--panel));
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 20px 22px;
+    box-shadow: var(--shadow);
+    position: relative;
+    overflow: hidden;
+  }
+  .card.feature { border-color: rgba(227,178,90,0.4); }
+  .card.feature::before {
+    content: "";
+    position: absolute; inset: 0;
+    background: radial-gradient(420px 200px at 90% -40%, rgba(227,178,90,0.16), transparent 60%);
+    pointer-events: none;
+  }
+  .card .k {
+    font-family: "Spline Sans Mono", monospace;
+    font-size: 10.5px; letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--muted); margin: 0 0 12px;
+    display: flex; align-items: center; gap: 7px;
+  }
+  .card .v {
+    font-family: "Fraunces", serif;
+    font-weight: 400;
+    font-size: clamp(1.7rem, 3.4vw, 2.55rem);
+    line-height: 1;
+    letter-spacing: -0.01em;
+  }
+  .card.feature .v { color: var(--gold-soft); }
+  .card .sub {
+    font-family: "Spline Sans Mono", monospace;
+    font-size: 12px; color: var(--parch-dim); margin-top: 9px;
+  }
+  .card .sub .up { color: var(--teal-soft); }
+  .range-row { display: flex; gap: 18px; margin-top: 6px; }
+  .range-row .rng { font-family:"Spline Sans Mono",monospace; }
+  .range-row .rng span { display:block; font-size: 10px; letter-spacing:0.12em; text-transform:uppercase; color: var(--muted); margin-bottom: 3px; }
+  .range-row .rng b { font-weight: 500; font-size: 14.5px; }
+  .rng.worst b { color: var(--rose-soft); }
+  .rng.best b  { color: var(--gold-soft); }
+
+  /* composition bar */
+  .composition {
+    margin-top: 4px;
+  }
+  .comp-bar {
+    height: 12px; border-radius: 999px; overflow: hidden;
+    display: flex; background: var(--ink-2);
+    border: 1px solid var(--line);
+  }
+  .comp-bar i { display: block; height: 100%; transition: width 0.5s cubic-bezier(.4,0,.1,1); }
+  .comp-bar .c-principal { background: #46527a; }
+  .comp-legend {
+    display: flex; gap: 18px; flex-wrap: wrap; margin-top: 12px;
+    font-size: 12px; color: var(--parch-dim);
+    font-family: "Spline Sans Mono", monospace;
+  }
+  .comp-legend span { display: inline-flex; align-items: center; gap: 7px; }
+  .comp-legend i { width: 9px; height: 9px; border-radius: 2px; display:inline-block; }
+
+  /* chart panels */
+  .chart-panel {
+    background: linear-gradient(180deg, var(--panel), var(--ink-2));
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 22px 22px 16px;
+    box-shadow: var(--shadow);
+  }
+  .chart-head {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    gap: 16px; margin-bottom: 6px; flex-wrap: wrap;
+  }
+  .chart-head h2 {
+    font-family: "Fraunces", serif; font-weight: 400; font-style: italic;
+    font-size: 1.5rem; margin: 0 0 3px; letter-spacing: -0.01em;
+  }
+  .chart-head p { margin: 0; font-size: 12.5px; color: var(--muted); max-width: 480px; }
+  .legend { display: flex; gap: 16px; flex-wrap: wrap; }
+  .legend .li {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: "Spline Sans Mono", monospace; font-size: 12px; color: var(--parch-dim);
+  }
+  .legend .swatch { width: 16px; height: 3px; border-radius: 2px; display:inline-block; }
+  .legend .swatch.dash { background: none; border-top: 2px dashed currentColor; height: 0; }
+
+  .chart-shell { position: relative; width: 100%; }
+  svg.chart { width: 100%; height: auto; display: block; overflow: visible; }
+  .axis-label { fill: var(--muted); font-family: "Spline Sans Mono", monospace; font-size: 11px; }
+  .grid-line { stroke: var(--line-soft); stroke-width: 1; }
+  .grid-line.base { stroke: var(--line); }
+
+  /* tooltip */
+  .tooltip {
+    position: absolute;
+    pointer-events: none;
+    background: rgba(8,11,20,0.96);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 11px 13px;
+    font-size: 12px;
+    box-shadow: 0 16px 40px -16px rgba(0,0,0,0.9);
+    opacity: 0;
+    transition: opacity 0.12s;
+    z-index: 20;
+    min-width: 168px;
+    backdrop-filter: blur(4px);
+  }
+  .tooltip .tt-year {
+    font-family: "Spline Sans Mono", monospace; color: var(--gold);
+    font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase;
+    margin-bottom: 8px; padding-bottom: 7px; border-bottom: 1px solid var(--line-soft);
+  }
+  .tooltip .tt-row { display: flex; justify-content: space-between; gap: 18px; margin: 4px 0; }
+  .tooltip .tt-row .lbl { color: var(--parch-dim); display:flex; align-items:center; gap:6px; }
+  .tooltip .tt-row .val { font-family: "Spline Sans Mono", monospace; font-weight: 500; }
+  .tooltip .tt-dot { width: 8px; height: 8px; border-radius: 50%; display:inline-block; }
+
+  .divider-stats {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 16px;
+    padding-top: 16px; border-top: 1px dashed var(--line-soft);
+  }
+  @media (max-width: 560px){ .divider-stats { grid-template-columns: 1fr; } }
+  .divider-stats .ds { }
+  .divider-stats .ds .k { font-family:"Spline Sans Mono",monospace; font-size:10px; letter-spacing:0.16em; text-transform:uppercase; color: var(--muted); margin-bottom:6px; }
+  .divider-stats .ds .v { font-family:"Spline Sans Mono",monospace; font-size: 18px; font-weight:500; }
+
+  footer.foot {
+    margin-top: 46px; padding-top: 22px; border-top: 1px solid var(--line);
+    font-size: 11.5px; color: var(--muted); line-height: 1.6;
+    display: flex; justify-content: space-between; gap: 20px; flex-wrap: wrap;
+  }
+  footer.foot .sig { font-family: "Fraunces", serif; font-style: italic; color: var(--parch-dim); }
+
+  .pulse { animation: pulse 0.5s ease; }
+  @keyframes pulse { 0%{ opacity: 0.4; } 100%{ opacity: 1; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="masthead">
+    <div>
+      <p class="brand-eyebrow">The Compounding Observatory</p>
+      <h1 class="title">Watch your money<br><em>grow over time.</em></h1>
+    </div>
+    <div class="masthead-aside">
+      A projection studio for the patient investor. Adjust your contributions and a
+      growth band, then read the future across decades.
+      <div class="index-tag" style="margin-top:10px;">MODELLED ON BROAD-INDEX BEHAVIOUR · S&amp;P 500-STYLE</div>
+    </div>
+  </header>
+
+  <div class="layout">
+
+    <!-- ===================== CONTROLS ===================== -->
+    <aside class="controls">
+
+      <div class="ctl-section">
+        <p class="ctl-heading">Your Capital</p>
+        <div class="field">
+          <label>Initial investment <span class="hint">lump sum today</span></label>
+          <div class="money-input"><span class="cur">$</span>
+            <input id="initial" type="text" inputmode="numeric" value="10,000" />
+          </div>
+        </div>
+        <div class="field">
+          <label>Monthly contribution <span class="hint">every month</span></label>
+          <div class="money-input"><span class="cur">$</span>
+            <input id="monthly" type="text" inputmode="numeric" value="500" />
+          </div>
+        </div>
+      </div>
+
+      <div class="ctl-section">
+        <p class="ctl-heading">Annual Price Growth Band</p>
+        <div class="trio">
+          <div class="field pct-suffix">
+            <label><span class="dot worst"></span>Worst</label>
+            <input id="gWorst" type="number" step="0.1" value="3" />
+          </div>
+          <div class="field pct-suffix">
+            <label><span class="dot avg"></span>Expected</label>
+            <input id="gAvg" type="number" step="0.1" value="7" />
+          </div>
+          <div class="field pct-suffix">
+            <label><span class="dot best"></span>Best</label>
+            <input id="gBest" type="number" step="0.1" value="11" />
+          </div>
+        </div>
+        <p class="note">
+          <b>What number do I use?</b> Ignore last month or last year — markets are noisy short-term.
+          Use a <b>long-run average</b>. The S&amp;P 500 has historically returned roughly
+          <b>10%/yr total</b>, of which about <b>6–7% is price growth</b> and the rest is dividends.
+          Since you enter dividends separately below, this band is <b>price growth only</b> (so we don't
+          double-count). Defaults of 3 / 7 / 11% bracket most 20–30 year outcomes.
+        </p>
+      </div>
+
+      <div class="ctl-section">
+        <p class="ctl-heading">Dividends</p>
+        <div class="field pct-suffix">
+          <label>12-month yield <span class="hint">% of holdings / yr</span></label>
+          <input id="divYield" type="number" step="0.1" value="1.8" />
+        </div>
+        <div class="field">
+          <label>Payout frequency</label>
+          <select id="divFreq">
+            <option value="12">Monthly</option>
+            <option value="4" selected>Quarterly</option>
+            <option value="2">Semi-annual</option>
+            <option value="1">Annual</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Dividend handling</label>
+          <div class="seg" id="reinvestSeg">
+            <button data-v="1" class="on">↺ Auto-reinvest</button>
+            <button data-v="0">↧ Take as cash</button>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ===================== STAGE ===================== -->
+    <main class="stage">
+
+      <div class="horizon" id="horizon">
+        <span class="hz-label">Horizon</span>
+        <button class="pill" data-y="1">1 yr</button>
+        <button class="pill" data-y="3">3 yr</button>
+        <button class="pill" data-y="5">5 yr</button>
+        <button class="pill" data-y="10">10 yr</button>
+        <button class="pill on" data-y="20">20 yr</button>
+        <button class="pill" data-y="30">30 yr</button>
+        <button class="pill" data-y="40">40 yr</button>
+        <button class="pill" data-y="50">50 yr</button>
+      </div>
+
+      <!-- headline -->
+      <section class="headline">
+        <div class="card feature">
+          <p class="k"><span class="tt-dot" style="background:var(--avg)"></span>Projected value · expected case</p>
+          <div class="v" id="hValue">$0</div>
+          <div class="range-row">
+            <div class="rng worst"><span>Worst case</span><b id="hWorst">$0</b></div>
+            <div class="rng best"><span>Best case</span><b id="hBest">$0</b></div>
+          </div>
+        </div>
+        <div class="card">
+          <p class="k">You will have invested</p>
+          <div class="v" id="hContrib" style="font-size:2rem;">$0</div>
+          <div class="sub" id="hContribSub">out of your own pocket</div>
+        </div>
+        <div class="card">
+          <p class="k">Earned on top</p>
+          <div class="v" id="hGain" style="font-size:2rem; color:var(--teal-soft);">$0</div>
+          <div class="sub"><span class="up" id="hMultiple">0×</span> your contributions</div>
+        </div>
+      </section>
+
+      <!-- composition -->
+      <section class="card composition">
+        <p class="k">Where the expected total comes from</p>
+        <div class="comp-bar">
+          <i class="c-principal" id="compPrincipal" style="background:#46527a;"></i>
+          <i class="c-growth"    id="compGrowth"    style="background:linear-gradient(90deg,#58d3ab,#2fae8a);"></i>
+          <i class="c-div"       id="compDiv"       style="background:linear-gradient(90deg,#e3b25a,#c9923a);"></i>
+        </div>
+        <div class="comp-legend">
+          <span><i style="background:#46527a"></i>Your contributions <b id="legPrincipal" style="color:var(--parch)">—</b></span>
+          <span><i style="background:#58d3ab"></i>Investment growth <b id="legGrowth" style="color:var(--parch)">—</b></span>
+          <span><i style="background:#e3b25a"></i>Dividends <b id="legDiv" style="color:var(--parch)">—</b></span>
+        </div>
+      </section>
+
+      <!-- growth chart -->
+      <section class="chart-panel">
+        <div class="chart-head">
+          <div>
+            <h2>The range of outcomes</h2>
+            <p>Same plan, three futures. The shaded band is everything between your worst and best annual-growth assumptions.</p>
+          </div>
+          <div class="legend">
+            <span class="li" style="color:var(--best)"><span class="swatch" style="background:var(--best)"></span>Best</span>
+            <span class="li" style="color:var(--avg)"><span class="swatch" style="background:var(--avg)"></span>Expected</span>
+            <span class="li" style="color:var(--worst)"><span class="swatch" style="background:var(--worst)"></span>Worst</span>
+            <span class="li" style="color:var(--muted)"><span class="swatch dash"></span>Contributions</span>
+          </div>
+        </div>
+        <div class="chart-shell">
+          <svg class="chart" id="growthChart" viewBox="0 0 860 400" preserveAspectRatio="xMidYMid meet"></svg>
+          <div class="tooltip" id="growthTip"></div>
+        </div>
+      </section>
+
+      <!-- dividend chart -->
+      <section class="chart-panel">
+        <div class="chart-head">
+          <div>
+            <h2>Your dividend income</h2>
+            <p id="divCaption">Cash paid out by your holdings each year, plus the running total. Switch dividend handling on the left to compare.</p>
+          </div>
+          <div class="legend">
+            <span class="li" style="color:var(--gold)"><span class="swatch" style="background:var(--gold)"></span>Annual income</span>
+            <span class="li" style="color:var(--teal)"><span class="swatch" style="background:var(--teal)"></span>Cumulative</span>
+          </div>
+        </div>
+        <div class="chart-shell">
+          <svg class="chart" id="divChart" viewBox="0 0 860 360" preserveAspectRatio="xMidYMid meet"></svg>
+          <div class="tooltip" id="divTip"></div>
+        </div>
+        <div class="divider-stats">
+          <div class="ds"><div class="k">Total dividends (this mode)</div><div class="v" id="dsTotal" style="color:var(--gold-soft)">$0</div></div>
+          <div class="ds"><div class="k">Final-year income</div><div class="v" id="dsFinal" style="color:var(--teal-soft)">$0</div></div>
+          <div class="ds"><div class="k">Reinvesting vs. cash · extra total dividends</div><div class="v" id="dsDelta" style="color:var(--parch)">$0</div></div>
+        </div>
+      </section>
+
+      <footer class="foot">
+        <div>
+          Projections are deterministic models, not predictions. Real markets do not deliver a
+          smooth annual return — they lurch. Treat the band as a guide to the <em>shape</em> of
+          compounding, not a guarantee. Figures are nominal (not inflation-adjusted) and exclude
+          taxes and fees.
+        </div>
+        <div class="sig">— Compounded monthly, with patience.</div>
+      </footer>
+
+    </main>
+  </div>
+</div>
+
+<script>
+"use strict";
+
+/* ----------------------------- State ----------------------------- */
+const state = {
+  initial: 10000,
+  monthly: 500,
+  gWorst: 3, gAvg: 7, gBest: 11,
+  divYield: 1.8,
+  divFreq: 4,
+  reinvest: true,
+  years: 20,
+};
+
+/* ----------------------------- Formatting ----------------------------- */
+const fmt0 = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
+const fmtPlain = new Intl.NumberFormat("en-US", { maximumFractionDigits: 0 });
+function money(n){ return fmt0.format(Math.round(n)); }
+function compact(n){
+  const a = Math.abs(n);
+  if (a >= 1e9) return "$" + (n/1e9).toFixed(a>=1e10?0:1) + "B";
+  if (a >= 1e6) return "$" + (n/1e6).toFixed(a>=1e7?0:1) + "M";
+  if (a >= 1e3) return "$" + (n/1e3).toFixed(a>=1e4?0:0) + "K";
+  return "$" + Math.round(n);
+}
+
+/* ----------------------------- Simulation ----------------------------- */
+// Returns yearly snapshots [{year, balance, contributed, divCumulative, divThisYear, cashOut}]
+function simulate({ initial, monthly, annualGrowth, divYield, divPerYear, reinvest, years }) {
+  const months = years * 12;
+  const mGrowth = Math.pow(1 + annualGrowth / 100, 1 / 12) - 1;
+  const divInterval = Math.round(12 / divPerYear); // months between payouts
+  const divRate = (divYield / 100) / divPerYear;   // fraction of balance per payout
+
+  let balance = initial;
+  let contributed = initial;
+  let divCum = 0;
+  let cashOut = 0;
+
+  const snaps = [{ year: 0, balance, contributed, divCumulative: 0, divThisYear: 0, cashOut: 0 }];
+  let divAtYearStart = 0;
+
+  for (let m = 1; m <= months; m++) {
+    balance *= (1 + mGrowth);          // price appreciation
+    balance += monthly;                // contribution
+    contributed += monthly;
+
+    if (m % divInterval === 0) {       // dividend payout
+      const payment = balance * divRate;
+      divCum += payment;
+      if (reinvest) balance += payment;
+      else cashOut += payment;
+    }
+
+    if (m % 12 === 0) {
+      snaps.push({
+        year: m / 12,
+        balance,
+        contributed,
+        divCumulative: divCum,
+        divThisYear: divCum - divAtYearStart,
+        cashOut,
+      });
+      divAtYearStart = divCum;
+    }
+  }
+  return snaps;
+}
+
+function runAll() {
+  const base = {
+    initial: state.initial, monthly: state.monthly,
+    divYield: state.divYield, divPerYear: state.divFreq,
+    reinvest: state.reinvest, years: state.years,
+  };
+  return {
+    worst: simulate({ ...base, annualGrowth: state.gWorst }),
+    avg:   simulate({ ...base, annualGrowth: state.gAvg }),
+    best:  simulate({ ...base, annualGrowth: state.gBest }),
+    // dividend comparison runs (expected growth, both modes)
+    divReinvest: simulate({ ...base, annualGrowth: state.gAvg, reinvest: true }),
+    divCash:     simulate({ ...base, annualGrowth: state.gAvg, reinvest: false }),
+  };
+}
+
+/* ----------------------------- Axis helpers ----------------------------- */
+function niceCeil(x) {
+  if (x <= 0) return 1;
+  const exp = Math.floor(Math.log10(x));
+  const base = Math.pow(10, exp);
+  const f = x / base;
+  let nf;
+  if (f <= 1) nf = 1; else if (f <= 2) nf = 2; else if (f <= 2.5) nf = 2.5;
+  else if (f <= 5) nf = 5; else nf = 10;
+  return nf * base;
+}
+
+/* ----------------------------- Growth chart ----------------------------- */
+const SVGNS = "http://www.w3.org/2000/svg";
+function el(name, attrs) {
+  const e = document.createElementNS(SVGNS, name);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  return e;
+}
+
+let growthGeom = null;
+
+function drawGrowth(sim) {
+  const svg = document.getElementById("growthChart");
+  svg.innerHTML = "";
+  const W = 860, H = 400;
+  const padL = 64, padR = 22, padT = 18, padB = 38;
+  const plotW = W - padL - padR, plotH = H - padT - padB;
+
+  const yrs = state.years;
+  const maxVal = niceCeil(sim.best[sim.best.length - 1].balance);
+  const X = (yr) => padL + (yr / yrs) * plotW;
+  const Y = (v) => padT + plotH - (v / maxVal) * plotH;
+
+  // defs: gradients + glow
+  const defs = el("defs", {});
+  defs.innerHTML = `
+    <linearGradient id="bandGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="rgba(227,178,90,0.16)"/>
+      <stop offset="100%" stop-color="rgba(88,211,171,0.03)"/>
+    </linearGradient>
+    <linearGradient id="avgFill" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="rgba(88,211,171,0.22)"/>
+      <stop offset="100%" stop-color="rgba(88,211,171,0)"/>
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="3.2" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>`;
+  svg.appendChild(defs);
+
+  // gridlines + y labels
+  const ticks = 5;
+  for (let i = 0; i <= ticks; i++) {
+    const v = (maxVal / ticks) * i;
+    const y = Y(v);
+    svg.appendChild(el("line", { x1: padL, y1: y, x2: W - padR, y2: y, class: "grid-line" + (i === 0 ? " base" : "") }));
+    const t = el("text", { x: padL - 12, y: y + 4, class: "axis-label", "text-anchor": "end" });
+    t.textContent = compact(v);
+    svg.appendChild(t);
+  }
+
+  // x labels
+  const xStep = yrs <= 10 ? (yrs <= 5 ? 1 : 2) : yrs / 5;
+  for (let yr = 0; yr <= yrs; yr += xStep) {
+    const x = X(yr);
+    const t = el("text", { x, y: H - 12, class: "axis-label", "text-anchor": "middle" });
+    t.textContent = "Yr " + Math.round(yr);
+    svg.appendChild(t);
+  }
+
+  const pts = (series) => series.map(s => [X(s.year), Y(s.balance)]);
+  const path = (p) => "M" + p.map(d => d[0].toFixed(1) + "," + d[1].toFixed(1)).join(" L");
+
+  const pBest = pts(sim.best), pAvg = pts(sim.avg), pWorst = pts(sim.worst);
+  const pContrib = sim.avg.map(s => [X(s.year), Y(s.contributed)]);
+
+  // band between best and worst
+  const bandD = path(pBest) + " L" + pWorst.slice().reverse().map(d => d[0].toFixed(1) + "," + d[1].toFixed(1)).join(" L") + " Z";
+  svg.appendChild(el("path", { d: bandD, fill: "url(#bandGrad)", stroke: "none" }));
+
+  // avg area fill
+  const avgArea = path(pAvg) + ` L${X(yrs).toFixed(1)},${Y(0).toFixed(1)} L${X(0).toFixed(1)},${Y(0).toFixed(1)} Z`;
+  svg.appendChild(el("path", { d: avgArea, fill: "url(#avgFill)", stroke: "none" }));
+
+  // contributions dashed baseline
+  svg.appendChild(el("path", { d: path(pContrib), fill: "none", stroke: "var(--muted)", "stroke-width": 1.4, "stroke-dasharray": "5 5", opacity: 0.7 }));
+
+  // lines
+  function drawLine(p, color, w, glow) {
+    const ln = el("path", { d: path(p), fill: "none", stroke: color, "stroke-width": w, "stroke-linejoin": "round", "stroke-linecap": "round" });
+    if (glow) ln.setAttribute("filter", "url(#glow)");
+    // draw-on animation
+    const len = ln.getTotalLength ? 0 : 0;
+    svg.appendChild(ln);
+    try {
+      const L = ln.getTotalLength();
+      ln.style.strokeDasharray = L;
+      ln.style.strokeDashoffset = L;
+      ln.style.transition = "stroke-dashoffset 0.9s cubic-bezier(.3,0,.1,1)";
+      requestAnimationFrame(() => { ln.style.strokeDashoffset = 0; });
+    } catch (e) {}
+    return ln;
+  }
+  drawLine(pWorst, "var(--worst)", 2);
+  drawLine(pBest, "var(--best)", 2);
+  drawLine(pAvg, "var(--avg)", 2.6, true);
+
+  // endpoint markers
+  function endDot(p, color) {
+    const last = p[p.length - 1];
+    svg.appendChild(el("circle", { cx: last[0], cy: last[1], r: 4, fill: color, stroke: "var(--ink)", "stroke-width": 1.5 }));
+  }
+  endDot(pWorst, "var(--worst)"); endDot(pBest, "var(--best)"); endDot(pAvg, "var(--avg)");
+
+  // hover layer
+  const guide = el("line", { x1: 0, y1: padT, x2: 0, y2: padT + plotH, stroke: "var(--gold)", "stroke-width": 1, opacity: 0 });
+  svg.appendChild(guide);
+  const hoverDots = ["var(--worst)", "var(--avg)", "var(--best)"].map(c => {
+    const d = el("circle", { r: 4.5, fill: "var(--ink)", stroke: c, "stroke-width": 2, opacity: 0 });
+    svg.appendChild(d); return d;
+  });
+
+  growthGeom = { svg, W, H, padL, padR, padT, plotW, plotH, X, Y, yrs, sim, guide, hoverDots, maxVal };
+  const overlay = el("rect", { x: padL, y: padT, width: plotW, height: plotH, fill: "transparent", style: "cursor:crosshair" });
+  svg.appendChild(overlay);
+  overlay.addEventListener("mousemove", onGrowthHover);
+  overlay.addEventListener("mouseleave", () => {
+    guide.setAttribute("opacity", 0);
+    hoverDots.forEach(d => d.setAttribute("opacity", 0));
+    document.getElementById("growthTip").style.opacity = 0;
+  });
+}
+
+function svgPointFromEvent(svg, evt) {
+  const rect = svg.getBoundingClientRect();
+  const vb = svg.viewBox.baseVal;
+  const x = (evt.clientX - rect.left) / rect.width * vb.width;
+  const y = (evt.clientY - rect.top) / rect.height * vb.height;
+  return { x, y, rect };
+}
+
+function onGrowthHover(evt) {
+  const g = growthGeom; if (!g) return;
+  const { x } = svgPointFromEvent(g.svg, evt);
+  const frac = Math.max(0, Math.min(1, (x - g.padL) / g.plotW));
+  const yr = Math.round(frac * g.yrs);
+  const idx = yr; // snaps indexed by year 0..yrs
+  const w = g.sim.worst[idx], a = g.sim.avg[idx], b = g.sim.best[idx];
+  if (!a) return;
+  const px = g.X(yr);
+  g.guide.setAttribute("x1", px); g.guide.setAttribute("x2", px); g.guide.setAttribute("opacity", 0.6);
+  const series = [w, a, b];
+  g.hoverDots.forEach((d, i) => {
+    d.setAttribute("cx", px); d.setAttribute("cy", g.Y(series[i].balance)); d.setAttribute("opacity", 1);
+  });
+
+  const tip = document.getElementById("growthTip");
+  tip.innerHTML = `
+    <div class="tt-year">Year ${yr} · age of plan</div>
+    <div class="tt-row"><span class="lbl"><span class="tt-dot" style="background:var(--best)"></span>Best</span><span class="val" style="color:var(--gold-soft)">${money(b.balance)}</span></div>
+    <div class="tt-row"><span class="lbl"><span class="tt-dot" style="background:var(--avg)"></span>Expected</span><span class="val" style="color:var(--teal-soft)">${money(a.balance)}</span></div>
+    <div class="tt-row"><span class="lbl"><span class="tt-dot" style="background:var(--worst)"></span>Worst</span><span class="val" style="color:var(--rose-soft)">${money(w.balance)}</span></div>
+    <div class="tt-row" style="margin-top:7px;padding-top:7px;border-top:1px solid var(--line-soft)"><span class="lbl" style="color:var(--muted)">Invested</span><span class="val" style="color:var(--muted)">${money(a.contributed)}</span></div>`;
+  positionTip(tip, g.svg, px, evt);
+}
+
+function positionTip(tip, svg, svgX, evt) {
+  const rect = svg.getBoundingClientRect();
+  const vb = svg.viewBox.baseVal;
+  const screenX = rect.left + (svgX / vb.width) * rect.width;
+  const shellRect = svg.parentElement.getBoundingClientRect();
+  let left = screenX - shellRect.left + 16;
+  tip.style.opacity = 1;
+  const tw = tip.offsetWidth;
+  if (left + tw > shellRect.width) left = (screenX - shellRect.left) - tw - 16;
+  tip.style.left = left + "px";
+  const localY = (evt.clientY - shellRect.top);
+  tip.style.top = Math.max(4, localY - tip.offsetHeight - 12) + "px";
+}
+
+/* ----------------------------- Dividend chart ----------------------------- */
+let divGeom = null;
+
+function drawDividends(sim) {
+  const svg = document.getElementById("divChart");
+  svg.innerHTML = "";
+  const W = 860, H = 360;
+  const padL = 64, padR = 54, padT = 18, padB = 38;
+  const plotW = W - padL - padR, plotH = H - padT - padB;
+
+  // active mode series (skip year 0)
+  const active = state.reinvest ? sim.divReinvest : sim.divCash;
+  const data = active.slice(1); // years 1..N
+  const n = data.length;
+
+  const maxAnnual = niceCeil(Math.max(...data.map(d => d.divThisYear), 1));
+  const maxCum = niceCeil(Math.max(...data.map(d => d.divCumulative), 1));
+
+  const bandW = plotW / n;
+  const barW = Math.max(2, Math.min(bandW * 0.62, 26));
+  const Xc = (i) => padL + bandW * i + bandW / 2;
+  const Yb = (v) => padT + plotH - (v / maxAnnual) * plotH;
+  const Yc = (v) => padT + plotH - (v / maxCum) * plotH;
+
+  const defs = el("defs", {});
+  defs.innerHTML = `
+    <linearGradient id="barGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="var(--gold-soft)"/>
+      <stop offset="100%" stop-color="rgba(201,146,58,0.55)"/>
+    </linearGradient>
+    <linearGradient id="cumFill" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="rgba(88,211,171,0.18)"/>
+      <stop offset="100%" stop-color="rgba(88,211,171,0)"/>
+    </linearGradient>`;
+  svg.appendChild(defs);
+
+  // left grid (annual)
+  const ticks = 4;
+  for (let i = 0; i <= ticks; i++) {
+    const v = (maxAnnual / ticks) * i;
+    const y = Yb(v);
+    svg.appendChild(el("line", { x1: padL, y1: y, x2: W - padR, y2: y, class: "grid-line" + (i === 0 ? " base" : "") }));
+    const t = el("text", { x: padL - 12, y: y + 4, class: "axis-label", "text-anchor": "end" });
+    t.textContent = compact(v);
+    svg.appendChild(t);
+  }
+  // right axis (cumulative)
+  for (let i = 0; i <= ticks; i++) {
+    const v = (maxCum / ticks) * i;
+    const y = Yc(v);
+    const t = el("text", { x: W - padR + 10, y: y + 4, class: "axis-label", "text-anchor": "start", fill: "var(--teal)" });
+    t.textContent = compact(v);
+    svg.appendChild(t);
+  }
+
+  // x labels
+  const xStep = n <= 10 ? (n <= 5 ? 1 : 2) : Math.ceil(n / 8);
+  data.forEach((d, i) => {
+    if (i % xStep === 0 || i === n - 1) {
+      const t = el("text", { x: Xc(i), y: H - 12, class: "axis-label", "text-anchor": "middle" });
+      t.textContent = "Yr " + d.year;
+      svg.appendChild(t);
+    }
+  });
+
+  // bars
+  data.forEach((d, i) => {
+    const h = (padT + plotH) - Yb(d.divThisYear);
+    const r = el("rect", {
+      x: Xc(i) - barW / 2, y: padT + plotH, width: barW, height: 0,
+      rx: Math.min(3, barW / 2), fill: "url(#barGrad)", opacity: 0.92,
+    });
+    svg.appendChild(r);
+    requestAnimationFrame(() => {
+      r.style.transition = "y 0.7s cubic-bezier(.3,0,.1,1), height 0.7s cubic-bezier(.3,0,.1,1)";
+      r.setAttribute("y", Yb(d.divThisYear));
+      r.setAttribute("height", Math.max(0, h));
+    });
+  });
+
+  // cumulative area + line
+  const cumPts = data.map((d, i) => [Xc(i), Yc(d.divCumulative)]);
+  const cumPath = "M" + cumPts.map(p => p[0].toFixed(1) + "," + p[1].toFixed(1)).join(" L");
+  const cumArea = cumPath + ` L${Xc(n - 1).toFixed(1)},${(padT + plotH).toFixed(1)} L${Xc(0).toFixed(1)},${(padT + plotH).toFixed(1)} Z`;
+  svg.appendChild(el("path", { d: cumArea, fill: "url(#cumFill)", stroke: "none" }));
+  const cumLine = el("path", { d: cumPath, fill: "none", stroke: "var(--teal)", "stroke-width": 2.4, "stroke-linejoin": "round", "stroke-linecap": "round" });
+  svg.appendChild(cumLine);
+  try {
+    const L = cumLine.getTotalLength();
+    cumLine.style.strokeDasharray = L; cumLine.style.strokeDashoffset = L;
+    cumLine.style.transition = "stroke-dashoffset 0.9s ease";
+    requestAnimationFrame(() => { cumLine.style.strokeDashoffset = 0; });
+  } catch (e) {}
+
+  // hover
+  const guide = el("line", { x1: 0, y1: padT, x2: 0, y2: padT + plotH, stroke: "var(--gold)", "stroke-width": 1, opacity: 0 });
+  svg.appendChild(guide);
+  const cumDot = el("circle", { r: 4.5, fill: "var(--ink)", stroke: "var(--teal)", "stroke-width": 2, opacity: 0 });
+  svg.appendChild(cumDot);
+
+  divGeom = { svg, padL, plotW, plotH, padT, bandW, n, data, Xc, Yb, Yc, guide, cumDot };
+  const overlay = el("rect", { x: padL, y: padT, width: plotW, height: plotH, fill: "transparent", style: "cursor:crosshair" });
+  svg.appendChild(overlay);
+  overlay.addEventListener("mousemove", onDivHover);
+  overlay.addEventListener("mouseleave", () => {
+    guide.setAttribute("opacity", 0); cumDot.setAttribute("opacity", 0);
+    document.getElementById("divTip").style.opacity = 0;
+  });
+}
+
+function onDivHover(evt) {
+  const g = divGeom; if (!g) return;
+  const { x } = svgPointFromEvent(g.svg, evt);
+  let i = Math.floor((x - g.padL) / g.bandW);
+  i = Math.max(0, Math.min(g.n - 1, i));
+  const d = g.data[i];
+  const px = g.Xc(i);
+  g.guide.setAttribute("x1", px); g.guide.setAttribute("x2", px); g.guide.setAttribute("opacity", 0.6);
+  g.cumDot.setAttribute("cx", px); g.cumDot.setAttribute("cy", g.Yc(d.divCumulative)); g.cumDot.setAttribute("opacity", 1);
+
+  const tip = document.getElementById("divTip");
+  tip.innerHTML = `
+    <div class="tt-year">Year ${d.year}</div>
+    <div class="tt-row"><span class="lbl"><span class="tt-dot" style="background:var(--gold)"></span>This year</span><span class="val" style="color:var(--gold-soft)">${money(d.divThisYear)}</span></div>
+    <div class="tt-row"><span class="lbl"><span class="tt-dot" style="background:var(--teal)"></span>Total so far</span><span class="val" style="color:var(--teal-soft)">${money(d.divCumulative)}</span></div>`;
+  positionTip(tip, g.svg, px, evt);
+}
+
+/* ----------------------------- Headline + composition ----------------------------- */
+function updateReadouts(sim) {
+  const a = sim.avg[sim.avg.length - 1];
+  const w = sim.worst[sim.worst.length - 1];
+  const b = sim.best[sim.best.length - 1];
+
+  document.getElementById("hValue").textContent = money(a.balance);
+  document.getElementById("hWorst").textContent = money(w.balance);
+  document.getElementById("hBest").textContent = money(b.balance);
+
+  // value shown: reinvest -> balance; cash -> balance + cash collected (net worth)
+  const expectedNetWorth = state.reinvest ? a.balance : a.balance + a.cashOut;
+  if (!state.reinvest) {
+    document.getElementById("hValue").textContent = money(expectedNetWorth);
+  }
+
+  document.getElementById("hContrib").textContent = money(a.contributed);
+
+  const gain = expectedNetWorth - a.contributed;
+  document.getElementById("hGain").textContent = money(gain);
+  const mult = a.contributed > 0 ? (expectedNetWorth / a.contributed) : 0;
+  document.getElementById("hMultiple").textContent = mult.toFixed(2) + "×";
+
+  // composition (expected): principal vs price-growth vs dividends
+  const principal = a.contributed;
+  const dividends = a.divCumulative;
+  // price growth = total value minus principal minus dividends (reinvested dividends counted in dividends bucket)
+  const total = state.reinvest ? a.balance : a.balance + a.cashOut;
+  let growth = total - principal - dividends;
+  if (growth < 0) growth = 0;
+  const sum = principal + growth + dividends || 1;
+  document.getElementById("compPrincipal").style.width = (principal / sum * 100) + "%";
+  document.getElementById("compGrowth").style.width = (growth / sum * 100) + "%";
+  document.getElementById("compDiv").style.width = (dividends / sum * 100) + "%";
+  document.getElementById("legPrincipal").textContent = money(principal);
+  document.getElementById("legGrowth").textContent = money(growth);
+  document.getElementById("legDiv").textContent = money(dividends);
+
+  // dividend stats
+  const activeDiv = state.reinvest ? sim.divReinvest : sim.divCash;
+  const lastDiv = activeDiv[activeDiv.length - 1];
+  document.getElementById("dsTotal").textContent = money(lastDiv.divCumulative);
+  document.getElementById("dsFinal").textContent = money(lastDiv.divThisYear);
+
+  const reinvestTotal = sim.divReinvest[sim.divReinvest.length - 1].divCumulative;
+  const cashTotal = sim.divCash[sim.divCash.length - 1].divCumulative;
+  const delta = reinvestTotal - cashTotal;
+  document.getElementById("dsDelta").textContent = "+" + money(delta);
+
+  document.getElementById("divCaption").textContent = state.reinvest
+    ? "Dividends are reinvested, so each year buys more shares — income compounds upward. The running total climbs faster than taking cash."
+    : "Dividends are paid out as cash and not reinvested. Income still rises as contributions grow your holdings, but more slowly than reinvesting.";
+}
+
+/* ----------------------------- Render ----------------------------- */
+function render() {
+  const sim = runAll();
+  updateReadouts(sim);
+  drawGrowth(sim);
+  drawDividends(sim);
+}
+
+/* ----------------------------- Input wiring ----------------------------- */
+function parseMoney(s){ const n = parseFloat(String(s).replace(/[^0-9.]/g, "")); return isNaN(n) ? 0 : n; }
+function commaFmt(n){ return fmtPlain.format(Math.round(n)); }
+
+function bindMoney(id, key) {
+  const inp = document.getElementById(id);
+  inp.addEventListener("input", () => {
+    const caretEnd = inp.selectionStart === inp.value.length;
+    const n = parseMoney(inp.value);
+    state[key] = n;
+    inp.value = n ? commaFmt(n) : "";
+    if (caretEnd) { inp.selectionStart = inp.selectionEnd = inp.value.length; }
+    render();
+  });
+}
+bindMoney("initial", "initial");
+bindMoney("monthly", "monthly");
+
+function bindNum(id, key) {
+  const inp = document.getElementById(id);
+  inp.addEventListener("input", () => {
+    const n = parseFloat(inp.value);
+    state[key] = isNaN(n) ? 0 : n;
+    render();
+  });
+}
+bindNum("gWorst", "gWorst");
+bindNum("gAvg", "gAvg");
+bindNum("gBest", "gBest");
+bindNum("divYield", "divYield");
+
+document.getElementById("divFreq").addEventListener("change", (e) => {
+  state.divFreq = parseInt(e.target.value, 10);
+  render();
+});
+
+document.getElementById("reinvestSeg").addEventListener("click", (e) => {
+  const btn = e.target.closest("button"); if (!btn) return;
+  state.reinvest = btn.dataset.v === "1";
+  [...e.currentTarget.children].forEach(b => b.classList.toggle("on", b === btn));
+  render();
+});
+
+document.getElementById("horizon").addEventListener("click", (e) => {
+  const btn = e.target.closest("button"); if (!btn) return;
+  state.years = parseInt(btn.dataset.y, 10);
+  [...e.currentTarget.querySelectorAll(".pill")].forEach(b => b.classList.toggle("on", b === btn));
+  render();
+});
+
+/* normalize initial money fields */
+document.getElementById("initial").value = commaFmt(state.initial);
+document.getElementById("monthly").value = commaFmt(state.monthly);
+
+render();
+window.addEventListener("resize", () => { /* charts are viewBox-responsive; redraw to reset hover geom */ render(); });
+</script>
+</body>
+</html>

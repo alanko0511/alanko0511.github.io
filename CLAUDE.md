@@ -7,7 +7,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 A GitHub Pages **user site** (`alanko0511.github.io`) used to publish standalone HTML files publicly. There is no build step, no framework, no package manager, and no tests. Every file under the repo is served as-is from the `main` branch root.
 
 - A file at `tools/compound-observatory.html` is reachable at `https://alanko0511.github.io/tools/compound-observatory.html`.
+- `index.html` at the repo root is the landing page (`https://alanko0511.github.io/`) — a catalogue listing every published page.
 - Pushing to `main` deploys. There is no CI/build — GitHub Pages serves the committed files directly.
+
+## ⚠️ Keep the index in sync
+
+`index.html` renders its catalogue from a single `const TOOLS = [...]` array near the bottom of the file. **Whenever you add, remove, rename, or move a page, edit that array in the same change** — add/update/delete the entry's `name`, `href` (relative to repo root), `blurb`, and `tag`. Nothing else needs touching. A new page that isn't in `TOOLS` is unreachable from the landing page.
 
 ## Conventions for HTML artifacts
 

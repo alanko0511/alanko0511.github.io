@@ -258,6 +258,8 @@
     border-radius: 0 6px 6px 0;
   }
   .note b { color: var(--gold-soft); font-weight: 500; }
+  .note a { color: var(--gold-soft); text-decoration: underline; text-underline-offset: 2px; }
+  .note a:hover { color: var(--gold); }
 
   /* reinvest toggle */
   .seg {
@@ -478,7 +480,7 @@
     <div class="masthead-aside">
       A projection studio for the patient investor. Adjust your contributions and a
       growth band, then read the future across decades.
-      <div class="index-tag" style="margin-top:10px;">MODELLED ON BROAD-INDEX BEHAVIOUR · S&amp;P 500-STYLE</div>
+      <div class="index-tag" style="margin-top:10px;">MODELLED ON XEQT · GLOBAL ALL-EQUITY ETF</div>
     </div>
   </header>
 
@@ -508,23 +510,27 @@
         <div class="trio">
           <div class="field pct-suffix">
             <label><span class="dot worst"></span>Worst</label>
-            <input id="gWorst" type="number" step="0.1" value="3" />
+            <input id="gWorst" type="number" step="0.1" value="4" />
           </div>
           <div class="field pct-suffix">
             <label><span class="dot avg"></span>Expected</label>
-            <input id="gAvg" type="number" step="0.1" value="7" />
+            <input id="gAvg" type="number" step="0.1" value="8" />
           </div>
           <div class="field pct-suffix">
             <label><span class="dot best"></span>Best</label>
-            <input id="gBest" type="number" step="0.1" value="11" />
+            <input id="gBest" type="number" step="0.1" value="12" />
           </div>
         </div>
         <p class="note">
           <b>What number do I use?</b> Ignore last month or last year — markets are noisy short-term.
-          Use a <b>long-run average</b>. The S&amp;P 500 has historically returned roughly
-          <b>10%/yr total</b>, of which about <b>6–7% is price growth</b> and the rest is dividends.
-          Since you enter dividends separately below, this band is <b>price growth only</b> (so we don't
-          double-count). Defaults of 3 / 7 / 11% bracket most 20–30 year outcomes.
+          Use a <b>long-run average</b>.
+          <a href="https://www.blackrock.com/ca/investors/en/products/309480/ishares-core-equity-etf-portfolio" target="_blank" rel="noopener"><b>XEQT</b></a>
+          (iShares Core Equity, a global all-equity ETF) has returned roughly <b>13–14%/yr total</b>
+          since its 2019 launch — but that's a short, unusually strong window. A saner long-run
+          assumption is <b>~9–10%/yr total</b>, of which about <b>8% is price growth</b> and
+          <b>~1.5% is dividends</b>. Since you enter dividends separately below, this band is
+          <b>price growth only</b> (so we don't double-count). Defaults of 4 / 8 / 12% bracket
+          most 20–30 year outcomes.
         </p>
       </div>
 
@@ -532,7 +538,7 @@
         <p class="ctl-heading">Dividends</p>
         <div class="field pct-suffix">
           <label>12-month yield <span class="hint">% of holdings / yr</span></label>
-          <input id="divYield" type="number" step="0.1" value="1.8" />
+          <input id="divYield" type="number" step="0.1" value="1.5" />
         </div>
         <div class="field">
           <label>Payout frequency</label>
@@ -669,8 +675,8 @@
 const state = {
   initial: 10000,
   monthly: 500,
-  gWorst: 3, gAvg: 7, gBest: 11,
-  divYield: 1.8,
+  gWorst: 4, gAvg: 8, gBest: 12,
+  divYield: 1.5,
   divFreq: 4,
   reinvest: true,
   years: 20,

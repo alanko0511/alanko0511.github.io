@@ -777,7 +777,7 @@ function drawGrowth(sim) {
   const plotW = W - padL - padR, plotH = H - padT - padB;
 
   const yrs = state.years;
-  const maxVal = niceCeil(sim.best[sim.best.length - 1].balance);
+  const maxVal = niceCeil(netWorth(sim.best[sim.best.length - 1]));
   const X = (yr) => padL + (yr / yrs) * plotW;
   const Y = (v) => padT + plotH - (v / maxVal) * plotH;
 
@@ -818,7 +818,7 @@ function drawGrowth(sim) {
     svg.appendChild(t);
   }
 
-  const pts = (series) => series.map(s => [X(s.year), Y(s.balance)]);
+  const pts = (series) => series.map(s => [X(s.year), Y(netWorth(s))]);
   const path = (p) => "M" + p.map(d => d[0].toFixed(1) + "," + d[1].toFixed(1)).join(" L");
 
   const pBest = pts(sim.best), pAvg = pts(sim.avg), pWorst = pts(sim.worst);
@@ -901,15 +901,15 @@ function onGrowthHover(evt) {
   g.guide.setAttribute("x1", px); g.guide.setAttribute("x2", px); g.guide.setAttribute("opacity", 0.6);
   const series = [w, a, b];
   g.hoverDots.forEach((d, i) => {
-    d.setAttribute("cx", px); d.setAttribute("cy", g.Y(series[i].balance)); d.setAttribute("opacity", 1);
+    d.setAttribute("cx", px); d.setAttribute("cy", g.Y(netWorth(series[i]))); d.setAttribute("opacity", 1);
   });
 
   const tip = document.getElementById("growthTip");
   tip.innerHTML = `
     <div class="tt-year">Year ${yr} · age of plan</div>
-    <div class="tt-row"><span class="lbl"><span class="tt-dot" style="background:var(--best)"></span>Best</span><span class="val" style="color:var(--gold-soft)">${money(b.balance)}</span></div>
-    <div class="tt-row"><span class="lbl"><span class="tt-dot" style="background:var(--avg)"></span>Expected</span><span class="val" style="color:var(--teal-soft)">${money(a.balance)}</span></div>
-    <div class="tt-row"><span class="lbl"><span class="tt-dot" style="background:var(--worst)"></span>Worst</span><span class="val" style="color:var(--rose-soft)">${money(w.balance)}</span></div>
+    <div class="tt-row"><span class="lbl"><span class="tt-dot" style="background:var(--best)"></span>Best</span><span class="val" style="color:var(--gold-soft)">${money(netWorth(b))}</span></div>
+    <div class="tt-row"><span class="lbl"><span class="tt-dot" style="background:var(--avg)"></span>Expected</span><span class="val" style="color:var(--teal-soft)">${money(netWorth(a))}</span></div>
+    <div class="tt-row"><span class="lbl"><span class="tt-dot" style="background:var(--worst)"></span>Worst</span><span class="val" style="color:var(--rose-soft)">${money(netWorth(w))}</span></div>
     <div class="tt-row" style="margin-top:7px;padding-top:7px;border-top:1px solid var(--line-soft)"><span class="lbl" style="color:var(--muted)">Invested</span><span class="val" style="color:var(--muted)">${money(a.contributed)}</span></div>`;
   positionTip(tip, g.svg, px, evt);
 }
@@ -1057,20 +1057,20 @@ function onDivHover(evt) {
 }
 
 /* ----------------------------- Headline + composition ----------------------------- */
+// Net worth for a yearly snapshot: portfolio value, plus any dividends taken as cash.
+// Reinvested dividends already live inside `balance`, so cashOut is 0 in that mode.
+// Every headline/chart figure must use this so worst/expected/best stay comparable.
+function netWorth(snap) { return state.reinvest ? snap.balance : snap.balance + snap.cashOut; }
+
 function updateReadouts(sim) {
   const a = sim.avg[sim.avg.length - 1];
   const w = sim.worst[sim.worst.length - 1];
   const b = sim.best[sim.best.length - 1];
 
-  document.getElementById("hValue").textContent = money(a.balance);
-  document.getElementById("hWorst").textContent = money(w.balance);
-  document.getElementById("hBest").textContent = money(b.balance);
-
-  // value shown: reinvest -> balance; cash -> balance + cash collected (net worth)
-  const expectedNetWorth = state.reinvest ? a.balance : a.balance + a.cashOut;
-  if (!state.reinvest) {
-    document.getElementById("hValue").textContent = money(expectedNetWorth);
-  }
+  const expectedNetWorth = netWorth(a);
+  document.getElementById("hValue").textContent = money(expectedNetWorth);
+  document.getElementById("hWorst").textContent = money(netWorth(w));
+  document.getElementById("hBest").textContent = money(netWorth(b));
 
   document.getElementById("hContrib").textContent = money(a.contributed);
 
@@ -1083,7 +1083,7 @@ function updateReadouts(sim) {
   const principal = a.contributed;
   const dividends = a.divCumulative;
   // price growth = total value minus principal minus dividends (reinvested dividends counted in dividends bucket)
-  const total = state.reinvest ? a.balance : a.balance + a.cashOut;
+  const total = expectedNetWorth;
   let growth = total - principal - dividends;
   if (growth < 0) growth = 0;
   const sum = principal + growth + dividends || 1;

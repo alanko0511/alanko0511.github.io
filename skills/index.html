@@ -333,6 +333,25 @@
     border-top: 1px solid var(--line-soft);
     margin: 28px 0 0;
   }
+  .reader-note {
+    margin: 20px 0 0;
+    padding: 12px 16px;
+    border: 1px solid rgba(227,178,90,0.26);
+    border-radius: 10px;
+    background: rgba(227,178,90,0.06);
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--parch-dim);
+  }
+  .reader-note .note-label {
+    font-family: "Spline Sans Mono", monospace;
+    font-size: 10px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-right: 9px;
+    white-space: nowrap;
+  }
 
   /* rendered markdown */
   .md {
@@ -448,6 +467,7 @@
       <header class="reader-head">
         <h2 class="name" id="reader-name"></h2>
         <p class="desc" id="reader-desc"></p>
+        <div class="reader-note" id="reader-note" hidden><span class="note-label">Note</span><span class="note-text"></span></div>
         <hr />
       </header>
       <div class="md" id="reader-body"></div>
@@ -468,6 +488,13 @@
         dir: "explorer-api",
         blurb: "Inspect and manage local KV, R2, D1, Durable Objects, and Workflows via the wrangler dev Explorer API at localhost:8787/cdn-cgi/explorer/api.",
         tag: "Cloudflare",
+      },
+      {
+        name: "Receipt Printer (V320L)",
+        dir: "receipt-printer",
+        blurb: "Print notes, lists, reminders, and QR codes to an 80mm ESC/POS thermal printer over the LAN. Bundles a Python helper, an ESC/POS reference, and the GBK/ASCII gotchas verified on the hardware.",
+        tag: "Hardware",
+        note: "Built for my personal setup — the printer model, static IP (192.168.2.250), and network details are specific to my LAN. Swap them for your own hardware and addresses to use it.",
       },
     ];
 
@@ -509,9 +536,12 @@
         const kv = line.match(/^([A-Za-z0-9_-]+):\s?(.*)$/);
         if (kv) {
           key = kv[1];
-          meta[key] = kv[2];
+          let val = kv[2];
+          // strip a YAML block-scalar indicator (| or >, with optional chomping/indent)
+          if (/^[|>][+-]?\d*\s*$/.test(val)) val = "";
+          meta[key] = val;
         } else if (key && line.trim()) {
-          meta[key] += " " + line.trim();
+          meta[key] += (meta[key] ? " " : "") + line.trim();
         }
       }
       return { meta, body: text.slice(m[0].length) };
@@ -522,6 +552,7 @@
     const elCrumb = document.getElementById("reader-crumb");
     const elName  = document.getElementById("reader-name");
     const elDesc  = document.getElementById("reader-desc");
+    const elNote  = document.getElementById("reader-note");
     const elBody  = document.getElementById("reader-body");
     const rawBtn  = document.getElementById("raw-btn");
     const copyBtn = document.getElementById("copy-btn");
@@ -535,6 +566,12 @@
       elCrumb.textContent = file;
       elName.textContent = s.name;
       elDesc.textContent = s.blurb;
+      if (s.note) {
+        elNote.querySelector(".note-text").textContent = s.note;
+        elNote.hidden = false;
+      } else {
+        elNote.hidden = true;
+      }
       rawBtn.href = file;
       elBody.innerHTML = `<p class="state">Loading…</p>`;
       try {

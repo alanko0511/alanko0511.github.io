@@ -73,6 +73,22 @@
     z-index: 1;
   }
 
+  /* ---------- Back nav ---------- */
+  .backlink {
+    font-family: "Spline Sans Mono", monospace;
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 26px;
+    transition: color 0.3s ease, gap 0.3s ease;
+  }
+  .backlink:hover { color: var(--gold); gap: 12px; }
+
   /* ---------- Masthead ---------- */
   header.masthead {
     display: flex;
@@ -471,6 +487,8 @@
 </head>
 <body>
 <div class="wrap">
+
+  <a class="backlink" href="../">← The Cabinet</a>
 
   <header class="masthead">
     <div>

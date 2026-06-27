@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Alan Ko — The Developer</title>
+<meta name="description" content="Convert an iPhone HEIC photo to JPEG, entirely in your browser — nothing leaves your device." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..600;1,9..144,400..500&family=Spline+Sans:wght@400;500&family=Spline+Sans+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --ink:        #0a0d18;
+    --panel:      #131a2e;
+    --line:       #25304f;
+    --line-soft:  #1b2440;
+    --parch:      #ece6d6;
+    --parch-dim:  #b9bdcf;
+    --muted:      #7e87a3;
+    --muted-2:    #5b637e;
+    --gold:       #e3b25a;
+    --gold-soft:  #f0cd8b;
+    --teal:       #58d3ab;
+    --rose:       #d28a8a;
+    --radius:     14px;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+
+  body {
+    font-family: "Spline Sans", system-ui, sans-serif;
+    background:
+      radial-gradient(1100px 680px at 82% -10%, rgba(227,178,90,0.11), transparent 60%),
+      radial-gradient(900px 760px at 4% 112%, rgba(88,211,171,0.08), transparent 58%),
+      var(--ink);
+    color: var(--parch);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    line-height: 1.5;
+    min-height: 100vh;
+    position: relative;
+    overflow-x: hidden;
+  }
+
+  /* film grain */
+  body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.035;
+    z-index: 9999;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  .wrap {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: clamp(40px, 8vh, 96px) clamp(20px, 5vw, 40px) 80px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ---------- Masthead ---------- */
+  .backlink {
+    font-family: "Spline Sans Mono", monospace;
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 30px;
+    transition: color 0.3s ease, gap 0.3s ease;
+  }
+  .backlink:hover { color: var(--gold); gap: 12px; }
+
+  .eyebrow {
+    font-family: "Spline Sans Mono", monospace;
+    font-size: 11px;
+    letter-spacing: 0.34em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin: 0 0 22px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .eyebrow::before {
+    content: "";
+    width: 26px; height: 1px;
+    background: var(--gold);
+    display: inline-block;
+  }
+
+  h1.title {
+    font-family: "Fraunces", serif;
+    font-optical-sizing: auto;
+    font-weight: 300;
+    font-size: clamp(2.4rem, 7vw, 4.2rem);
+    line-height: 0.98;
+    letter-spacing: -0.02em;
+    margin: 0;
+  }
+  h1.title em {
+    font-style: italic;
+    font-weight: 400;
+    color: var(--gold-soft);
+  }
+
+  .lede {
+    margin: 26px 0 0;
+    max-width: 48ch;
+    color: var(--parch-dim);
+    font-size: clamp(15px, 2.2vw, 17px);
+    line-height: 1.6;
+  }
+  .lede code {
+    font-family: "Spline Sans Mono", monospace;
+    font-size: 0.86em;
+    color: var(--gold-soft);
+    background: rgba(227,178,90,0.08);
+    border: 1px solid rgba(227,178,90,0.18);
+    border-radius: 5px;
+    padding: 1px 6px;
+  }
+
+  /* ---------- Drop zone ---------- */
+  .stage { margin-top: 44px; }
+
+  .dropzone {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: 16px;
+    min-height: 280px;
+    padding: 48px 28px;
+    border: 1.5px dashed var(--line);
+    border-radius: var(--radius);
+    background:
+      radial-gradient(700px 360px at 50% -10%, rgba(227,178,90,0.05), transparent 62%),
+      var(--panel);
+    cursor: pointer;
+    transition: border-color 0.3s ease, background 0.3s ease, transform 0.3s ease;
+  }
+  .dropzone:hover { border-color: var(--gold); }
+  .dropzone.drag {
+    border-color: var(--gold);
+    border-style: solid;
+    background:
+      radial-gradient(700px 360px at 50% -10%, rgba(227,178,90,0.12), transparent 62%),
+      var(--panel);
+    transform: scale(1.005);
+  }
+
+  .dz-glyph {
+    width: 56px; height: 56px;
+    display: grid; place-items: center;
+    border: 1px solid var(--line);
+    border-radius: 50%;
+    color: var(--gold);
+    font-size: 24px;
+    background: rgba(227,178,90,0.05);
+    transition: transform 0.4s cubic-bezier(.2,.7,.2,1), color 0.3s ease;
+  }
+  .dropzone:hover .dz-glyph,
+  .dropzone.drag .dz-glyph { transform: translateY(-3px); color: var(--gold-soft); }
+
+  .dz-title {
+    font-family: "Fraunces", serif;
+    font-weight: 400;
+    font-size: 1.5rem;
+    letter-spacing: -0.01em;
+    margin: 0;
+    color: var(--parch);
+  }
+  .dz-sub {
+    margin: 0;
+    color: var(--muted);
+    font-size: 14px;
+    max-width: 36ch;
+  }
+  .dz-browse {
+    color: var(--gold);
+    border-bottom: 1px solid rgba(227,178,90,0.4);
+  }
+  .dz-note {
+    margin: 4px 0 0;
+    font-family: "Spline Sans Mono", monospace;
+    font-size: 10.5px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--teal);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .dz-note::before {
+    content: "";
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--teal);
+    box-shadow: 0 0 8px rgba(88,211,171,0.7);
+  }
+
+  /* ---------- Result card ---------- */
+  .result {
+    margin-top: 28px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--panel);
+    overflow: hidden;
+    opacity: 0;
+    transform: translateY(12px);
+    animation: rise 0.6s cubic-bezier(.2,.7,.2,1) forwards;
+  }
+
+  .preview-frame {
+    position: relative;
+    background:
+      repeating-conic-gradient(#0e1322 0% 25%, #11172a 0% 50%) 50% / 22px 22px;
+    display: grid;
+    place-items: center;
+    min-height: 220px;
+    max-height: 420px;
+    overflow: hidden;
+  }
+  .preview-frame img {
+    display: block;
+    max-width: 100%;
+    max-height: 420px;
+    object-fit: contain;
+  }
+
+  .result-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    flex-wrap: wrap;
+    padding: 18px clamp(16px, 4vw, 26px);
+    border-top: 1px solid var(--line-soft);
+  }
+  .result-meta .info { min-width: 0; }
+  .result-meta .fname {
+    font-family: "Fraunces", serif;
+    font-size: 1.18rem;
+    color: var(--gold-soft);
+    margin: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 38ch;
+  }
+  .result-meta .stats {
+    margin-top: 7px;
+    font-family: "Spline Sans Mono", monospace;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .result-meta .stats b { color: var(--parch-dim); font-weight: 500; }
+  .result-meta .stats .sep { color: var(--muted-2); }
+
+  .actions { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+  .btn {
+    font-family: "Spline Sans Mono", monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--parch-dim);
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 10px 16px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: color 0.25s ease, border-color 0.25s ease, background 0.25s ease;
+    white-space: nowrap;
+  }
+  .btn:hover { color: var(--gold-soft); border-color: var(--gold); background: rgba(227,178,90,0.06); }
+  .btn.primary {
+    color: var(--ink);
+    background: var(--gold);
+    border-color: var(--gold);
+    font-weight: 500;
+  }
+  .btn.primary:hover { background: var(--gold-soft); border-color: var(--gold-soft); color: var(--ink); }
+  .btn.ghost { color: var(--muted); }
+
+  /* ---------- Quality control ---------- */
+  .quality {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-top: 22px;
+    padding: 0 4px;
+    font-family: "Spline Sans Mono", monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .quality label { white-space: nowrap; }
+  .quality input[type="range"] {
+    flex: 1;
+    accent-color: var(--gold);
+    cursor: pointer;
+  }
+  .quality .qval { color: var(--gold-soft); min-width: 3ch; text-align: right; }
+
+  /* ---------- Status / busy ---------- */
+  .status {
+    margin-top: 22px;
+    text-align: center;
+    font-family: "Spline Sans Mono", monospace;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    min-height: 18px;
+  }
+  .status.error { color: var(--rose); }
+  .spinner {
+    display: inline-block;
+    width: 13px; height: 13px;
+    margin-right: 9px;
+    border: 2px solid rgba(227,178,90,0.25);
+    border-top-color: var(--gold);
+    border-radius: 50%;
+    vertical-align: -2px;
+    animation: spin 0.7s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ---------- Colophon ---------- */
+  .colophon {
+    margin-top: 48px;
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    font-family: "Spline Sans Mono", monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    color: var(--muted-2);
+  }
+  .colophon a { color: var(--muted); text-decoration: none; border-bottom: 1px solid var(--line); }
+  .colophon a:hover { color: var(--gold); border-color: var(--gold); }
+
+  /* ---------- Entrance ---------- */
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .reveal { opacity: 0; animation: rise 0.8s cubic-bezier(.2,.7,.2,1) forwards; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .reveal, .result { animation: none; opacity: 1; transform: none; }
+  }
+
+  @media (max-width: 540px) {
+    .result-meta { flex-direction: column; align-items: stretch; }
+    .actions { justify-content: stretch; }
+    .actions .btn { flex: 1; text-align: center; }
+  }
+</style>
+</head>
+<body>
+  <main class="wrap">
+    <a class="backlink reveal" href="../" style="animation-delay: 0.02s">← The Cabinet</a>
+    <p class="eyebrow reveal" style="animation-delay: 0.05s">Alan Ko · Utility</p>
+    <h1 class="title reveal" style="animation-delay: 0.12s">The <em>Developer</em></h1>
+    <p class="lede reveal" style="animation-delay: 0.2s">
+      Drop an iPhone <code>HEIC</code> photo and pull out a clean <code>JPEG</code>.
+      The whole thing runs in your browser — the image never leaves your device.
+    </p>
+
+    <section class="stage reveal" style="animation-delay: 0.28s">
+      <div class="dropzone" id="dropzone" role="button" tabindex="0" aria-label="Choose or drop a HEIC file">
+        <div class="dz-glyph" aria-hidden="true">⤓</div>
+        <h2 class="dz-title">Drop a HEIC here</h2>
+        <p class="dz-sub">or <span class="dz-browse">browse for one</span> — a single <code style="font-size:0.85em">.heic</code> / <code style="font-size:0.85em">.heif</code> file</p>
+        <span class="dz-note">Converts locally · nothing uploaded</span>
+        <input type="file" id="file-input" accept=".heic,.heif,image/heic,image/heif" hidden />
+      </div>
+
+      <div class="quality" id="quality" hidden>
+        <label for="q">Quality</label>
+        <input type="range" id="q" min="40" max="100" step="1" value="90" />
+        <span class="qval" id="qval">90</span>
+      </div>
+
+      <div class="status" id="status" role="status" aria-live="polite"></div>
+
+      <div id="result-slot"></div>
+    </section>
+
+    <footer class="colophon reveal" style="animation-delay: 0.4s">
+      <span>Powered by libheif (WASM) · 100% client-side</span>
+      <a href="https://github.com/alanko0511/alanko0511.github.io">Source ↗</a>
+    </footer>
+  </main>
+
+  <script type="module">
+    import { heicTo, isHeic } from "https://esm.sh/heic-to@1.5.2";
+
+    const dropzone   = document.getElementById("dropzone");
+    const fileInput  = document.getElementById("file-input");
+    const statusEl   = document.getElementById("status");
+    const resultSlot = document.getElementById("result-slot");
+    const qualityBox = document.getElementById("quality");
+    const qSlider    = document.getElementById("q");
+    const qVal       = document.getElementById("qval");
+
+    let currentFile = null;       // the source HEIC File
+    let lastObjectURL = null;     // revoke previous preview/download URLs
+
+    const fmtBytes = (n) => {
+      if (n < 1024) return `${n} B`;
+      if (n < 1024 * 1024) return `${(n / 1024).toFixed(1)} KB`;
+      return `${(n / (1024 * 1024)).toFixed(2)} MB`;
+    };
+
+    // Fast name/type pre-check; the authoritative byte-level check is isHeic().
+    const looksHeic = (file) =>
+      /\.hei[cf]$/i.test(file.name) || /image\/hei[cf]/i.test(file.type) || file.type === "";
+
+    function setStatus(msg, { busy = false, error = false } = {}) {
+      statusEl.classList.toggle("error", error);
+      statusEl.innerHTML = busy ? `<span class="spinner"></span>${msg}` : msg;
+    }
+
+    /* ---------- wiring the drop zone ---------- */
+    dropzone.addEventListener("click", () => fileInput.click());
+    dropzone.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") { e.preventDefault(); fileInput.click(); }
+    });
+    fileInput.addEventListener("change", () => {
+      if (fileInput.files.length) handleFile(fileInput.files[0]);
+    });
+
+    ["dragenter", "dragover"].forEach((evt) =>
+      dropzone.addEventListener(evt, (e) => {
+        e.preventDefault();
+        dropzone.classList.add("drag");
+      })
+    );
+    ["dragleave", "dragend"].forEach((evt) =>
+      dropzone.addEventListener(evt, (e) => {
+        if (e.target === dropzone) dropzone.classList.remove("drag");
+      })
+    );
+    dropzone.addEventListener("drop", (e) => {
+      e.preventDefault();
+      dropzone.classList.remove("drag");
+      const file = e.dataTransfer.files?.[0];
+      if (file) handleFile(file);
+    });
+
+    /* re-encode when the quality slider moves (only if a file is loaded) */
+    qSlider.addEventListener("input", () => {
+      qVal.textContent = qSlider.value;
+    });
+    qSlider.addEventListener("change", () => {
+      if (currentFile) convert(currentFile);
+    });
+
+    /* ---------- the actual conversion ---------- */
+    async function handleFile(file) {
+      setStatus("Reading file…", { busy: true });
+      // Authoritative byte-level check — catches mislabeled files and rejects non-HEIC early.
+      let confirmed = false;
+      try { confirmed = await isHeic(file); } catch { confirmed = false; }
+      if (!confirmed && !looksHeic(file)) {
+        setStatus(`That doesn't look like a HEIC file (${file.type || "unknown type"}).`, { error: true });
+        return;
+      }
+      currentFile = file;
+      qualityBox.hidden = false;
+      await convert(file);
+    }
+
+    async function convert(file) {
+      setStatus("Decoding HEIC…", { busy: true });
+      const t0 = performance.now();
+      try {
+        const quality = Number(qSlider.value) / 100;
+        const jpeg = await heicTo({ blob: file, type: "image/jpeg", quality });
+        const elapsed = ((performance.now() - t0) / 1000).toFixed(1);
+        renderResult(file, jpeg, elapsed);
+        setStatus(`Done in ${elapsed}s — converted entirely on your device.`);
+      } catch (err) {
+        console.error(err);
+        resultSlot.innerHTML = "";
+        setStatus(`Couldn't convert this file — ${err?.message || err}. Make sure it's a genuine HEIC image.`, { error: true });
+      }
+    }
+
+    function renderResult(srcFile, jpegBlob, elapsed) {
+      if (lastObjectURL) URL.revokeObjectURL(lastObjectURL);
+      lastObjectURL = URL.createObjectURL(jpegBlob);
+
+      const outName = srcFile.name.replace(/\.hei[cf]$/i, "") + ".jpg";
+      const delta = jpegBlob.size - srcFile.size;
+      const pct = srcFile.size ? Math.round((delta / srcFile.size) * 100) : 0;
+      const deltaLabel = delta >= 0 ? `+${pct}%` : `${pct}%`;
+
+      resultSlot.innerHTML = `
+        <div class="result">
+          <div class="preview-frame">
+            <img id="preview" alt="" />
+          </div>
+          <div class="result-meta">
+            <div class="info">
+              <p class="fname" id="out-name"></p>
+              <p class="stats">
+                <span>HEIC <b>${fmtBytes(srcFile.size)}</b></span>
+                <span class="sep">→</span>
+                <span>JPEG <b>${fmtBytes(jpegBlob.size)}</b></span>
+                <span class="sep">·</span>
+                <span>${deltaLabel}</span>
+              </p>
+            </div>
+            <div class="actions">
+              <a class="btn primary" id="dl" download>Download JPEG</a>
+              <button class="btn ghost" id="reset" type="button">Another</button>
+            </div>
+          </div>
+        </div>`;
+
+      const img = document.getElementById("preview");
+      img.alt = `JPEG preview of ${outName}`;
+      img.src = lastObjectURL;
+      document.getElementById("out-name").textContent = outName;
+      const dl = document.getElementById("dl");
+      dl.href = lastObjectURL;
+      dl.download = outName;
+
+      document.getElementById("reset").addEventListener("click", () => {
+        currentFile = null;
+        fileInput.value = "";
+        qualityBox.hidden = true;
+        resultSlot.innerHTML = "";
+        setStatus("");
+        if (lastObjectURL) { URL.revokeObjectURL(lastObjectURL); lastObjectURL = null; }
+      });
+    }
+  </script>
+</body>
+</html>
